@@ -10,10 +10,10 @@ import sqlite3
 import os
 
 #: Директория для хранения базы данных.
-DB_DIR = "KeySystem"
+DB_DIR = os.environ.get("DB_DIR", "KeySystem")
 
 #: Полный путь к файлу базы данных SQLite.
-DB_PATH = os.path.join(DB_DIR, "D1.db")
+DB_PATH = os.environ.get("DB_PATH", os.path.join(DB_DIR, "D1.db"))
 
 
 def ensure_db_dir():

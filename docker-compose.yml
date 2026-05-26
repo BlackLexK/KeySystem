@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  keycontrol:
+    build: .
+    container_name: keycontrol-app
+    environment:
+      - DB_DIR=/app/data
+      - DB_PATH=/app/data/D1.db
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - ./data:/app/data
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    network_mode: host
+    stdin_open: true
+    tty: true
