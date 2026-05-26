@@ -1104,19 +1104,10 @@ overdue_seconds, note, key_number, user_name).</p>
 <dt class="sig sig-object py" id="database.create_db">
 <span class="sig-prename descclassname"><span class="pre">database.</span></span><span class="sig-name descname"><span class="pre">create_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#create_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.create_db" title="Link to this definition">¶</a></dt>
 <dd><p>Создаёт структуру базы данных и заполняет справочники.</p>
-<p>Выполняет следующие действия:
-1. Создаёт таблицы: access_levels, roles, users, action_types,</p>
-<blockquote>
-<div><p>rooms, keys, operations, violations.</p>
-</div></blockquote>
-<ol class="arabic simple" start="2">
-<li><p>Заполняет справочники уровней доступа (1–5).</p></li>
-<li><p>Создаёт роли: Сотрудник, Сотрудник_lvl2, Сотрудник_lvl3,
-Охранник, Администратор.</p></li>
-<li><p>Добавляет типы операций: 1 — выдача, 2 — возврат.</p></li>
-<li><p>Создаёт начального администратора (login: <code class="docutils literal notranslate"><span class="pre">admin</span></code>,
-password: <code class="docutils literal notranslate"><span class="pre">admin123</span></code>).</p></li>
-</ol>
+<p>Создает таблицы access_levels, roles, users, action_types,
+rooms, keys, operations, violations. Заполняет справочники
+уровней доступа, ролей и типов операций. Создает начального
+администратора (login: admin, password: admin123).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -1279,7 +1270,7 @@ password: <code class="docutils literal notranslate"><span class="pre">admin123<
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &#169;2024, Ваше Имя.
+      &#169;----.
       
       |
       Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>

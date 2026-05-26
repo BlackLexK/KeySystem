@@ -46,15 +46,10 @@ def create_db():
     """
     Создаёт структуру базы данных и заполняет справочники.
 
-    Выполняет следующие действия:
-    1. Создаёт таблицы: access_levels, roles, users, action_types,
-       rooms, keys, operations, violations.
-    2. Заполняет справочники уровней доступа (1–5).
-    3. Создаёт роли: Сотрудник, Сотрудник_lvl2, Сотрудник_lvl3,
-       Охранник, Администратор.
-    4. Добавляет типы операций: 1 — выдача, 2 — возврат.
-    5. Создаёт начального администратора (login: ``admin``,
-       password: ``admin123``).
+    Создает таблицы access_levels, roles, users, action_types,
+    rooms, keys, operations, violations. Заполняет справочники
+    уровней доступа, ролей и типов операций. Создает начального
+    администратора (login: admin, password: admin123).
 
     :return: None
     :raises sqlite3.Error: При ошибках выполнения SQL.
