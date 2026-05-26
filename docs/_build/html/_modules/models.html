@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>models &#8212; KeyControlApp 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for models</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Модуль моделей данных и CRUD-операций.</span>
+
+<span class="sd">Содержит функции для работы с сущностями системы:</span>
+<span class="sd">пользователи, роли, помещения, ключи, операции, нарушения.</span>
+<span class="sd">Все функции работают с SQLite через модуль database.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">database</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_connection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">hash_password</span><span class="p">,</span> <span class="n">now_iso</span>
+
+
+<span class="c1"># --- Справочники / инициализация ---</span>
+
+<div class="viewcode-block" id="insert_default_reference_data">
+<a class="viewcode-back" href="../modules.html#models.insert_default_reference_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">insert_default_reference_data</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Заполняет справочник типов операций, если он пуст.</span>
+
+<span class="sd">    Добавляет записи: 1 — выдача, 2 — возврат.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(*) FROM action_types&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">executemany</span><span class="p">(</span>
+            <span class="s2">&quot;INSERT INTO action_types (action_type) VALUES (?)&quot;</span><span class="p">,</span>
+            <span class="p">[(</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)]</span>
+        <span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --- Пользователи ---</span>
+
+<div class="viewcode-block" id="add_user">
+<a class="viewcode-back" href="../modules.html#models.add_user">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_user</span><span class="p">(</span><span class="n">role_id</span><span class="p">,</span> <span class="n">last_name</span><span class="p">,</span> <span class="n">first_name</span><span class="p">,</span> <span class="n">middle_name</span><span class="p">,</span> <span class="n">login</span><span class="p">,</span> <span class="n">password_plain</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Добавляет нового пользователя в систему.</span>
+
+<span class="sd">    :param role_id: Идентификатор роли пользователя.</span>
+<span class="sd">    :type role_id: int</span>
+<span class="sd">    :param last_name: Фамилия.</span>
+<span class="sd">    :type last_name: str</span>
+<span class="sd">    :param first_name: Имя.</span>
+<span class="sd">    :type first_name: str</span>
+<span class="sd">    :param middle_name: Отчество (может быть пустым).</span>
+<span class="sd">    :type middle_name: str</span>
+<span class="sd">    :param login: Уникальный логин для входа.</span>
+<span class="sd">    :type login: str</span>
+<span class="sd">    :param password_plain: Пароль в открытом виде (будет захеширован).</span>
+<span class="sd">    :type password_plain: str</span>
+<span class="sd">    :return: Идентификатор созданного пользователя.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    :raises sqlite3.IntegrityError: Если логин уже существует.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">pwd_hash</span> <span class="o">=</span> <span class="n">hash_password</span><span class="p">(</span><span class="n">password_plain</span><span class="p">)</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        INSERT INTO users (role_id, last_name, first_name, middle_name, login, password)</span>
+<span class="s2">        VALUES (?, ?, ?, ?, ?, ?)</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">role_id</span><span class="p">,</span> <span class="n">last_name</span><span class="p">,</span> <span class="n">first_name</span><span class="p">,</span> <span class="n">middle_name</span><span class="p">,</span> <span class="n">login</span><span class="p">,</span> <span class="n">pwd_hash</span><span class="p">))</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">uid</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">lastrowid</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">uid</span></div>
+
+
+
+<div class="viewcode-block" id="get_user_by_login">
+<a class="viewcode-back" href="../modules.html#models.get_user_by_login">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user_by_login</span><span class="p">(</span><span class="n">login</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает пользователя по логину.</span>
+
+<span class="sd">    :param login: Логин пользователя.</span>
+<span class="sd">    :type login: str</span>
+<span class="sd">    :return: Кортеж (user_id, role_id, last_name, first_name, middle_name, login, password)</span>
+<span class="sd">             или None, если пользователь не найден.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT user_id, role_id, last_name, first_name, middle_name, login, password</span>
+<span class="s2">        FROM users WHERE login = ?</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">login</span><span class="p">,))</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">row</span></div>
+
+
+
+<div class="viewcode-block" id="get_user">
+<a class="viewcode-back" href="../modules.html#models.get_user">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает пользователя по ID.</span>
+
+<span class="sd">    :param user_id: Идентификатор пользователя.</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :return: Кортеж (user_id, role_id, last_name, first_name, middle_name, login)</span>
+<span class="sd">             или None, если не найден.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT user_id, role_id, last_name, first_name, middle_name, login</span>
+<span class="s2">        FROM users WHERE user_id = ?</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<div class="viewcode-block" id="list_users">
+<a class="viewcode-back" href="../modules.html#models.list_users">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает список пользователей с ФИО и уровнем доступа.</span>
+
+<span class="sd">    :return: Список кортежей (user_id, fio, role_id, access_level, login, password).</span>
+<span class="sd">    :rtype: list[tuple]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT</span>
+<span class="s2">            u.user_id,</span>
+<span class="s2">            u.last_name || &#39; &#39; || u.first_name ||</span>
+<span class="s2">                CASE WHEN u.middle_name != &#39;&#39; THEN &#39; &#39; || u.middle_name ELSE &#39;&#39; END AS fio,</span>
+<span class="s2">            u.role_id,</span>
+<span class="s2">            a.level AS access_level,</span>
+<span class="s2">            u.login,</span>
+<span class="s2">            u.password</span>
+<span class="s2">        FROM users u</span>
+<span class="s2">        LEFT JOIN roles r ON u.role_id = r.role_id</span>
+<span class="s2">        LEFT JOIN access_levels a ON r.access_id = a.access_id</span>
+<span class="s2">        ORDER BY u.user_id</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+
+
+<div class="viewcode-block" id="list_users_full">
+<a class="viewcode-back" href="../modules.html#models.list_users_full">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_users_full</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает полные данные пользователей для отображения в таблице.</span>
+
+<span class="sd">    :return: Список кортежей (user_id, last_name, first_name, middle_name, login, role_id, access_level).</span>
+<span class="sd">    :rtype: list[tuple]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT</span>
+<span class="s2">            u.user_id,</span>
+<span class="s2">            u.last_name,</span>
+<span class="s2">            u.first_name,</span>
+<span class="s2">            u.middle_name,</span>
+<span class="s2">            u.login,</span>
+<span class="s2">            u.role_id,</span>
+<span class="s2">            a.level</span>
+<span class="s2">        FROM users u</span>
+<span class="s2">        LEFT JOIN roles r ON u.role_id = r.role_id</span>
+<span class="s2">        LEFT JOIN access_levels a ON r.access_id = a.access_id</span>
+<span class="s2">        ORDER BY u.user_id</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+
+
+<div class="viewcode-block" id="delete_user">
+<a class="viewcode-back" href="../modules.html#models.delete_user">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Удаляет пользователя по ID.</span>
+
+<span class="sd">    :param user_id: Идентификатор пользователя.</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :return: True, если удаление успешно.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM users WHERE user_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">user_id</span><span class="p">,))</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">rowcount</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ok</span></div>
+
+
+
+<div class="viewcode-block" id="update_user_password">
+<a class="viewcode-back" href="../modules.html#models.update_user_password">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_user_password</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">new_password_plain</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Обновляет пароль пользователя.</span>
+
+<span class="sd">    :param user_id: Идентификатор пользователя.</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :param new_password_plain: Новый пароль в открытом виде.</span>
+<span class="sd">    :type new_password_plain: str</span>
+<span class="sd">    :return: True, если обновление успешно.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">pwd_hash</span> <span class="o">=</span> <span class="n">hash_password</span><span class="p">(</span><span class="n">new_password_plain</span><span class="p">)</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;UPDATE users SET password = ? WHERE user_id = ?&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">pwd_hash</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">rowcount</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ok</span></div>
+
+
+
+<span class="c1"># --- Роли и уровни доступа ---</span>
+
+<div class="viewcode-block" id="get_role">
+<a class="viewcode-back" href="../modules.html#models.get_role">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_role</span><span class="p">(</span><span class="n">role_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает роль по ID.</span>
+
+<span class="sd">    :param role_id: Идентификатор роли.</span>
+<span class="sd">    :type role_id: int</span>
+<span class="sd">    :return: Кортеж (role_id, role_name, level) или None.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT r.role_id, r.role_name, a.level</span>
+<span class="s2">        FROM roles r</span>
+<span class="s2">        LEFT JOIN access_levels a ON r.access_id = a.access_id</span>
+<span class="s2">        WHERE r.role_id = ?</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">role_id</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<div class="viewcode-block" id="get_access_level_by_role">
+<a class="viewcode-back" href="../modules.html#models.get_access_level_by_role">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_access_level_by_role</span><span class="p">(</span><span class="n">role_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает числовой уровень доступа для роли.</span>
+
+<span class="sd">    :param role_id: Идентификатор роли.</span>
+<span class="sd">    :type role_id: int</span>
+<span class="sd">    :return: Уровень доступа (1–5) или None.</span>
+<span class="sd">    :rtype: int | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT a.level FROM roles r</span>
+<span class="s2">        LEFT JOIN access_levels a ON r.access_id = a.access_id</span>
+<span class="s2">        WHERE r.role_id = ?</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">role_id</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">r</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1"># --- Помещения ---</span>
+
+<div class="viewcode-block" id="add_room">
+<a class="viewcode-back" href="../modules.html#models.add_room">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_room</span><span class="p">(</span><span class="n">room_number</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">access_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Добавляет новое помещение.</span>
+
+<span class="sd">    :param room_number: Номер или название помещения.</span>
+<span class="sd">    :type room_number: str</span>
+<span class="sd">    :param description: Описание помещения.</span>
+<span class="sd">    :type description: str</span>
+<span class="sd">    :param access_id: Требуемый уровень доступа (опционально).</span>
+<span class="sd">    :type access_id: int | None</span>
+<span class="sd">    :return: Идентификатор созданного помещения.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;INSERT INTO rooms (room_number, description, access_id) VALUES (?, ?, ?)&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">room_number</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">access_id</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">rid</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">lastrowid</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rid</span></div>
+
+
+
+<div class="viewcode-block" id="list_rooms">
+<a class="viewcode-back" href="../modules.html#models.list_rooms">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_rooms</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает список всех помещений.</span>
+
+<span class="sd">    :return: Список кортежей (room_id, room_number, description, access_id).</span>
+<span class="sd">    :rtype: list[tuple]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT room_id, room_number, description, access_id FROM rooms ORDER BY room_id&quot;</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+
+
+<div class="viewcode-block" id="get_room">
+<a class="viewcode-back" href="../modules.html#models.get_room">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_room</span><span class="p">(</span><span class="n">room_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает помещение по ID.</span>
+
+<span class="sd">    :param room_id: Идентификатор помещения.</span>
+<span class="sd">    :type room_id: int</span>
+<span class="sd">    :return: Кортеж (room_id, room_number, description, access_id) или None.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT room_id, room_number, description, access_id FROM rooms WHERE room_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">room_id</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<div class="viewcode-block" id="delete_room">
+<a class="viewcode-back" href="../modules.html#models.delete_room">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_room</span><span class="p">(</span><span class="n">room_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Удаляет помещение и все связанные с ним ключи.</span>
+
+<span class="sd">    :param room_id: Идентификатор помещения.</span>
+<span class="sd">    :type room_id: int</span>
+<span class="sd">    :return: True, если удаление успешно.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM keys WHERE room_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">room_id</span><span class="p">,))</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM rooms WHERE room_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">room_id</span><span class="p">,))</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">rowcount</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ошибка delete_room:&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ok</span></div>
+
+
+
+<span class="c1"># --- Ключи ---</span>
+
+<div class="viewcode-block" id="add_key">
+<a class="viewcode-back" href="../modules.html#models.add_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_key</span><span class="p">(</span><span class="n">key_number</span><span class="p">,</span> <span class="n">room_id</span><span class="p">,</span> <span class="n">activity</span><span class="o">=</span><span class="s2">&quot;available&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Добавляет новый ключ.</span>
+
+<span class="sd">    :param key_number: Номер или обозначение ключа.</span>
+<span class="sd">    :type key_number: str</span>
+<span class="sd">    :param room_id: Идентификатор помещения.</span>
+<span class="sd">    :type room_id: int</span>
+<span class="sd">    :param activity: Статус ключа (``available``, ``issued``, ``lost``).</span>
+<span class="sd">    :type activity: str</span>
+<span class="sd">    :return: Идентификатор созданного ключа.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+        <span class="s2">&quot;INSERT INTO keys (key_number, room_id, activity) VALUES (?, ?, ?)&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">key_number</span><span class="p">,</span> <span class="n">room_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">kid</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">lastrowid</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">kid</span></div>
+
+
+
+<div class="viewcode-block" id="list_keys">
+<a class="viewcode-back" href="../modules.html#models.list_keys">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_keys</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает список всех ключей с информацией о помещениях.</span>
+
+<span class="sd">    :return: Список кортежей (key_id, key_number, room_number, activity).</span>
+<span class="sd">    :rtype: list[tuple]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT k.key_id, k.key_number, r.room_number, k.activity</span>
+<span class="s2">        FROM keys k LEFT JOIN rooms r ON k.room_id = r.room_id</span>
+<span class="s2">        ORDER BY k.key_id</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+
+
+<div class="viewcode-block" id="find_key_by_number">
+<a class="viewcode-back" href="../modules.html#models.find_key_by_number">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_key_by_number</span><span class="p">(</span><span class="n">key_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Ищет ключ по его номеру.</span>
+
+<span class="sd">    :param key_number: Номер ключа.</span>
+<span class="sd">    :type key_number: str</span>
+<span class="sd">    :return: Кортеж (key_id, key_number, room_id, activity) или None.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT key_id, key_number, room_id, activity FROM keys WHERE key_number = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">key_number</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<div class="viewcode-block" id="get_key">
+<a class="viewcode-back" href="../modules.html#models.get_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_key</span><span class="p">(</span><span class="n">key_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает ключ по ID.</span>
+
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :return: Кортеж (key_id, key_number, room_id, activity) или None.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT key_id, key_number, room_id, activity FROM keys WHERE key_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">key_id</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<div class="viewcode-block" id="update_key_activity">
+<a class="viewcode-back" href="../modules.html#models.update_key_activity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_key_activity</span><span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">activity</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Обновляет статус ключа.</span>
+
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :param activity: Новый статус (``available``, ``issued``, ``lost``).</span>
+<span class="sd">    :type activity: str</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;UPDATE keys SET activity = ? WHERE key_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">activity</span><span class="p">,</span> <span class="n">key_id</span><span class="p">))</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="update_key_status">
+<a class="viewcode-back" href="../modules.html#models.update_key_status">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">update_key_status</span><span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">new_status</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Обновляет статус ключа (обёртка с обработкой ошибок).</span>
+
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :param new_status: Новый статус.</span>
+<span class="sd">    :type new_status: str</span>
+<span class="sd">    :return: True, если обновление успешно.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;UPDATE keys SET activity = ? WHERE key_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">new_status</span><span class="p">,</span> <span class="n">key_id</span><span class="p">))</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="delete_key">
+<a class="viewcode-back" href="../modules.html#models.delete_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">delete_key</span><span class="p">(</span><span class="n">key_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Удаляет ключ по ID.</span>
+
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :return: True, если удаление успешно.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;DELETE FROM keys WHERE key_id = ?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">key_id</span><span class="p">,))</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">rowcount</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ok</span></div>
+
+
+
+<span class="c1"># --- Операции ---</span>
+
+<div class="viewcode-block" id="add_operation">
+<a class="viewcode-back" href="../modules.html#models.add_operation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_operation</span><span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">issued_by</span><span class="p">,</span> <span class="n">tips_id</span><span class="p">,</span> <span class="n">return_deadline</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Добавляет операцию (выдачи или возврата) в журнал.</span>
+
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :param user_id: Идентификатор пользователя (получателя/возвращающего).</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :param issued_by: Идентификатор сотрудника, оформившего операцию.</span>
+<span class="sd">    :type issued_by: int</span>
+<span class="sd">    :param tips_id: Тип операции (1 — выдача, 2 — возврат).</span>
+<span class="sd">    :type tips_id: int</span>
+<span class="sd">    :param return_deadline: Срок возврата (ISO формат), опционально.</span>
+<span class="sd">    :type return_deadline: str | None</span>
+<span class="sd">    :return: Идентификатор созданной операции.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        INSERT INTO operations (key_id, user_id, issued_by, datetime, return_deadline, tips_id)</span>
+<span class="s2">        VALUES (?, ?, ?, ?, ?, ?)</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">key_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">issued_by</span><span class="p">,</span> <span class="n">now_iso</span><span class="p">(),</span> <span class="n">return_deadline</span><span class="p">,</span> <span class="n">tips_id</span><span class="p">))</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">opid</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">lastrowid</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">opid</span></div>
+
+
+
+<div class="viewcode-block" id="get_last_operation_for_key">
+<a class="viewcode-back" href="../modules.html#models.get_last_operation_for_key">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_last_operation_for_key</span><span class="p">(</span><span class="n">key_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает последнюю операцию для указанного ключа.</span>
+
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :return: Кортеж операции или None.</span>
+<span class="sd">    :rtype: tuple | None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT operation_id, key_id, user_id, issued_by, datetime, return_deadline, tips_id</span>
+<span class="s2">        FROM operations</span>
+<span class="s2">        WHERE key_id = ?</span>
+<span class="s2">        ORDER BY operation_id DESC</span>
+<span class="s2">        LIMIT 1</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">key_id</span><span class="p">,))</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<div class="viewcode-block" id="list_operations">
+<a class="viewcode-back" href="../modules.html#models.list_operations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_operations</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает список операций с детализацией.</span>
+
+<span class="sd">    :param limit: Максимальное количество записей.</span>
+<span class="sd">    :type limit: int</span>
+<span class="sd">    :return: Список кортежей (operation_id, datetime, return_deadline,</span>
+<span class="sd">             operation_type, key_number, user_name, issuer_name).</span>
+<span class="sd">    :rtype: list[tuple]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT</span>
+<span class="s2">            o.operation_id,</span>
+<span class="s2">            o.datetime,</span>
+<span class="s2">            o.return_deadline,</span>
+<span class="s2">            CASE o.tips_id</span>
+<span class="s2">                WHEN 1 THEN &#39;Выдача&#39;</span>
+<span class="s2">                WHEN 2 THEN &#39;Возврат&#39;</span>
+<span class="s2">                ELSE &#39;Неизвестно&#39;</span>
+<span class="s2">            END AS operation_type,</span>
+<span class="s2">            k.key_number,</span>
+<span class="s2">            u.last_name || &#39; &#39; || u.first_name AS user_name,</span>
+<span class="s2">            issuer.last_name || &#39; &#39; || issuer.first_name AS issuer_name</span>
+<span class="s2">        FROM operations o</span>
+<span class="s2">        LEFT JOIN keys k ON o.key_id = k.key_id</span>
+<span class="s2">        LEFT JOIN users u ON o.user_id = u.user_id</span>
+<span class="s2">        LEFT JOIN users issuer ON o.issued_by = issuer.user_id</span>
+<span class="s2">        ORDER BY o.operation_id DESC</span>
+<span class="s2">        LIMIT ?</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">limit</span><span class="p">,))</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+
+
+<span class="c1"># --- Нарушения ---</span>
+
+<div class="viewcode-block" id="add_violation">
+<a class="viewcode-back" href="../modules.html#models.add_violation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_violation</span><span class="p">(</span><span class="n">operation_id</span><span class="p">,</span> <span class="n">key_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">overdue_seconds</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Добавляет запись о нарушении (просрочка возврата ключа).</span>
+
+<span class="sd">    :param operation_id: Идентификатор операции выдачи.</span>
+<span class="sd">    :type operation_id: int</span>
+<span class="sd">    :param key_id: Идентификатор ключа.</span>
+<span class="sd">    :type key_id: int</span>
+<span class="sd">    :param user_id: Идентификатор пользователя, нарушившего срок.</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :param overdue_seconds: Время просрочки в секундах.</span>
+<span class="sd">    :type overdue_seconds: int</span>
+<span class="sd">    :param note: Примечание к нарушению.</span>
+<span class="sd">    :type note: str</span>
+<span class="sd">    :return: Идентификатор созданной записи о нарушении.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        INSERT INTO violations (operation_id, key_id, user_id, overdue_seconds, note, recorded_at)</span>
+<span class="s2">        VALUES (?, ?, ?, ?, ?, ?)</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">operation_id</span><span class="p">,</span> <span class="n">key_id</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">overdue_seconds</span><span class="p">,</span> <span class="n">note</span><span class="p">,</span> <span class="n">now_iso</span><span class="p">()))</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+    <span class="n">vid</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">lastrowid</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">vid</span></div>
+
+
+
+<div class="viewcode-block" id="list_violations">
+<a class="viewcode-back" href="../modules.html#models.list_violations">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_violations</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Возвращает список нарушений с детализацией.</span>
+
+<span class="sd">    :param limit: Максимальное количество записей.</span>
+<span class="sd">    :type limit: int</span>
+<span class="sd">    :return: Список кортежей (violation_id, issued_at, returned_at,</span>
+<span class="sd">             overdue_seconds, note, key_number, user_name).</span>
+<span class="sd">    :rtype: list[tuple]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">get_connection</span><span class="p">()</span>
+    <span class="n">cur</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+    <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        SELECT</span>
+<span class="s2">            v.violation_id,</span>
+<span class="s2">            o.datetime AS issued_at,</span>
+<span class="s2">            o.return_deadline AS returned_at,</span>
+<span class="s2">            v.overdue_seconds,</span>
+<span class="s2">            v.note,</span>
+<span class="s2">            k.key_number,</span>
+<span class="s2">            u.last_name || &#39; &#39; || u.first_name AS user_name</span>
+<span class="s2">        FROM violations v</span>
+<span class="s2">        LEFT JOIN operations o ON v.operation_id = o.operation_id</span>
+<span class="s2">        LEFT JOIN keys k ON v.key_id = k.key_id</span>
+<span class="s2">        LEFT JOIN users u ON v.user_id = u.user_id</span>
+<span class="s2">        ORDER BY v.violation_id DESC</span>
+<span class="s2">        LIMIT ?</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">limit</span><span class="p">,))</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">KeyControlApp</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Ваше Имя.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

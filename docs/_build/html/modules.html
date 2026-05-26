@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Reference &#8212; KeyControlApp 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="KeyControlApp — документация" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-main">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-main" title="Link to this heading">¶</a></h1>
+<p>Точка входа в приложение «ИС учёта выдачи и возврата ключей».</p>
+<p>Создаёт базу данных, заполняет справочники и запускает
+окно авторизации. После успешного входа открывается
+главное окно приложения.</p>
+<p>Запуск:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>или после установки пакета:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">keycontrol</span>
+</pre></div>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="main.start_app">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">start_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#start_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.start_app" title="Link to this definition">¶</a></dt>
+<dd><p>Инициализирует базу данных и запускает приложение.</p>
+<p>Создаёт структуру БД (если не существует), заполняет
+справочные данные и открывает окно входа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-auth">Модуль авторизации.</p>
+<p>Содержит класс LoginWindow — модальное окно входа в систему
+с проверкой логина и пароля через сервис аутентификации.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="auth.LoginWindow">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">auth.</span></span><span class="sig-name descname"><span class="pre">LoginWindow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_success</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth.html#LoginWindow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth.LoginWindow" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Toplevel</span></code></p>
+<p>Модальное окно входа в систему.</p>
+<p>Отображает форму с полями для ввода логина и пароля.
+При успешной авторизации вызывает callback <code class="docutils literal notranslate"><span class="pre">on_success(user_id)</span></code>
+и закрывается.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>master</strong> (<em>tk.Tk</em><em> | </em><em>tk.Toplevel</em>) – Родительское окно tkinter.</p></li>
+<li><p><strong>on_success</strong> (<em>callable</em>) – Callback-функция, вызываемая при успешном входе.
+Принимает один аргумент — идентификатор пользователя.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Пример использования:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">on_success</span><span class="p">(</span><span class="n">user_id</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">KeyControlApp</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">tk</span><span class="o">.</span><span class="n">Tk</span><span class="p">()</span>
+<span class="n">LoginWindow</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">on_success</span><span class="p">)</span>
+<span class="n">root</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="auth.LoginWindow.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">master</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_success</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth.html#LoginWindow.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth.LoginWindow.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Инициализирует окно входа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>master</strong> – Родительское окно.</p></li>
+<li><p><strong>on_success</strong> – Callback при успешном входе.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth.LoginWindow.try_login">
+<span class="sig-name descname"><span class="pre">try_login</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth.html#LoginWindow.try_login"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth.LoginWindow.try_login" title="Link to this definition">¶</a></dt>
+<dd><p>Пытается выполнить вход с введёнными данными.</p>
+<p>При успехе вызывает <code class="docutils literal notranslate"><span class="pre">on_success(user_id)</span></code> и закрывает окно.
+При неудаче показывает сообщение об ошибке.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="auth.LoginWindow.on_cancel">
+<span class="sig-name descname"><span class="pre">on_cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/auth.html#LoginWindow.on_cancel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#auth.LoginWindow.on_cancel" title="Link to this definition">¶</a></dt>
+<dd><p>Закрывает окно входа без авторизации.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p id="module-gui">Модуль графического интерфейса.</p>
+<p>Содержит класс KeyControlApp — главное окно приложения
+с вкладками для управления ключами, помещениями, сотрудниками,
+операциями выдачи/возврата, журналом и нарушениями.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="gui.KeyControlApp">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">gui.</span></span><span class="sig-name descname"><span class="pre">KeyControlApp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_user_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Tk</span></code></p>
+<p>Главное окно приложения «ИС учёта выдачи и возврата ключей».</p>
+<p>Открывается после успешной авторизации. Содержит вкладки:
+«Ключи», «Помещения», «Сотрудники», «Выдача», «Возврат»,
+«Журнал операций», «Нарушения».</p>
+<p>Доступ к функциям ограничен по уровню пользователя:
+- Уровни 1–3: только просмотр.
+- Уровень 4 (охранник): + выдача/возврат, изменение статуса ключей.
+- Уровень 5 (администратор): + управление сущностями.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>current_user_id</strong> (<em>int</em>) – Идентификатор вошедшего пользователя.</p>
+</dd>
+</dl>
+<p>Пример использования:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">KeyControlApp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># ID администратора</span>
+<span class="n">app</span><span class="o">.</span><span class="n">mainloop</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_user_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Инициализирует главное окно и все вкладки.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>current_user_id</strong> – ID авторизованного пользователя.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.delete_key">
+<span class="sig-name descname"><span class="pre">delete_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.delete_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.delete_key" title="Link to this definition">¶</a></dt>
+<dd><p>Удаляет выбранный ключ после подтверждения.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.mark_key_lost">
+<span class="sig-name descname"><span class="pre">mark_key_lost</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.mark_key_lost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.mark_key_lost" title="Link to this definition">¶</a></dt>
+<dd><p>Отмечает выбранный ключ как утерянный.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.mark_key_found">
+<span class="sig-name descname"><span class="pre">mark_key_found</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.mark_key_found"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.mark_key_found" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает выбранный ключ в оборот (статус available).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.refresh_keys">
+<span class="sig-name descname"><span class="pre">refresh_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.refresh_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.refresh_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет таблицу ключей.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.add_key_dialog">
+<span class="sig-name descname"><span class="pre">add_key_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.add_key_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.add_key_dialog" title="Link to this definition">¶</a></dt>
+<dd><p>Открывает диалог добавления нового ключа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.delete_room">
+<span class="sig-name descname"><span class="pre">delete_room</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.delete_room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.delete_room" title="Link to this definition">¶</a></dt>
+<dd><p>Удаляет выбранное помещение и связанные ключи.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.refresh_rooms">
+<span class="sig-name descname"><span class="pre">refresh_rooms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.refresh_rooms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.refresh_rooms" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет таблицу помещений.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.add_room_dialog">
+<span class="sig-name descname"><span class="pre">add_room_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.add_room_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.add_room_dialog" title="Link to this definition">¶</a></dt>
+<dd><p>Открывает диалог добавления нового помещения.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.on_user_table_double_click">
+<span class="sig-name descname"><span class="pre">on_user_table_double_click</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.on_user_table_double_click"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.on_user_table_double_click" title="Link to this definition">¶</a></dt>
+<dd><p>Обрабатывает двойной клик по таблице сотрудников.</p>
+<p>При клике на колонку “Пароль” открывает диалог сброса пароля.
+Доступно только администраторам (уровень &gt;= 5).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>tk.Event</em>) – Событие tkinter.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.delete_user">
+<span class="sig-name descname"><span class="pre">delete_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.delete_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.delete_user" title="Link to this definition">¶</a></dt>
+<dd><p>Удаляет выбранного сотрудника.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.add_user_dialog">
+<span class="sig-name descname"><span class="pre">add_user_dialog</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.add_user_dialog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.add_user_dialog" title="Link to this definition">¶</a></dt>
+<dd><p>Открывает диалог добавления нового сотрудника.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.refresh_users">
+<span class="sig-name descname"><span class="pre">refresh_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.refresh_users"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.refresh_users" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет таблицу сотрудников с учётом фильтра по ФИО.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.on_issue_clicked">
+<span class="sig-name descname"><span class="pre">on_issue_clicked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.on_issue_clicked"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.on_issue_clicked" title="Link to this definition">¶</a></dt>
+<dd><p>Обрабатывает нажатие кнопки “Выдать”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.on_return_clicked">
+<span class="sig-name descname"><span class="pre">on_return_clicked</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.on_return_clicked"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.on_return_clicked" title="Link to this definition">¶</a></dt>
+<dd><p>Обрабатывает нажатие кнопки “Принять ключ”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.reset_journal_filter">
+<span class="sig-name descname"><span class="pre">reset_journal_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.reset_journal_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.reset_journal_filter" title="Link to this definition">¶</a></dt>
+<dd><p>Сбрасывает фильтры журнала и обновляет таблицу.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.refresh_journal">
+<span class="sig-name descname"><span class="pre">refresh_journal</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.refresh_journal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.refresh_journal" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет таблицу журнала операций.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.apply_journal_filter">
+<span class="sig-name descname"><span class="pre">apply_journal_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.apply_journal_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.apply_journal_filter" title="Link to this definition">¶</a></dt>
+<dd><p>Применяет фильтры к журналу операций (дата, ФИО).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.reset_violation_filter">
+<span class="sig-name descname"><span class="pre">reset_violation_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.reset_violation_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.reset_violation_filter" title="Link to this definition">¶</a></dt>
+<dd><p>Сбрасывает фильтры нарушений и обновляет таблицу.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.refresh_violations">
+<span class="sig-name descname"><span class="pre">refresh_violations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.refresh_violations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.refresh_violations" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет таблицу нарушений с учётом фильтра по ФИО.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.apply_violation_filter">
+<span class="sig-name descname"><span class="pre">apply_violation_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.apply_violation_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.apply_violation_filter" title="Link to this definition">¶</a></dt>
+<dd><p>Применяет фильтры к таблице нарушений (дата, ФИО).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.export_violations_excel">
+<span class="sig-name descname"><span class="pre">export_violations_excel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.export_violations_excel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.export_violations_excel" title="Link to this definition">¶</a></dt>
+<dd><p>Экспортирует список нарушений в файл Excel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.export_operations_excel">
+<span class="sig-name descname"><span class="pre">export_operations_excel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.export_operations_excel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.export_operations_excel" title="Link to this definition">¶</a></dt>
+<dd><p>Экспортирует журнал операций в файл Excel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.refresh_all">
+<span class="sig-name descname"><span class="pre">refresh_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.refresh_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.refresh_all" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет все таблицы приложения.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="gui.KeyControlApp.on_logout">
+<span class="sig-name descname"><span class="pre">on_logout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gui.html#KeyControlApp.on_logout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gui.KeyControlApp.on_logout" title="Link to this definition">¶</a></dt>
+<dd><p>Выполняет выход из системы и возвращает к окну авторизации.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p id="module-models">Модуль моделей данных и CRUD-операций.</p>
+<p>Содержит функции для работы с сущностями системы:
+пользователи, роли, помещения, ключи, операции, нарушения.
+Все функции работают с SQLite через модуль database.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="models.insert_default_reference_data">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">insert_default_reference_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#insert_default_reference_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.insert_default_reference_data" title="Link to this definition">¶</a></dt>
+<dd><p>Заполняет справочник типов операций, если он пуст.</p>
+<p>Добавляет записи: 1 — выдача, 2 — возврат.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.add_user">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">add_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">middle_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">login</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password_plain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#add_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.add_user" title="Link to this definition">¶</a></dt>
+<dd><p>Добавляет нового пользователя в систему.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>role_id</strong> (<em>int</em>) – Идентификатор роли пользователя.</p></li>
+<li><p><strong>last_name</strong> (<em>str</em>) – Фамилия.</p></li>
+<li><p><strong>first_name</strong> (<em>str</em>) – Имя.</p></li>
+<li><p><strong>middle_name</strong> (<em>str</em>) – Отчество (может быть пустым).</p></li>
+<li><p><strong>login</strong> (<em>str</em>) – Уникальный логин для входа.</p></li>
+<li><p><strong>password_plain</strong> (<em>str</em>) – Пароль в открытом виде (будет захеширован).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Идентификатор созданного пользователя.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sqlite3.IntegrityError</strong> – Если логин уже существует.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_user_by_login">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_user_by_login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_user_by_login"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_user_by_login" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает пользователя по логину.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>login</strong> (<em>str</em>) – Логин пользователя.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (user_id, role_id, last_name, first_name, middle_name, login, password)
+или None, если пользователь не найден.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_user">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_user" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает пользователя по ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<em>int</em>) – Идентификатор пользователя.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (user_id, role_id, last_name, first_name, middle_name, login)
+или None, если не найден.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.list_users">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">list_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#list_users"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.list_users" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает список пользователей с ФИО и уровнем доступа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Список кортежей (user_id, fio, role_id, access_level, login, password).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.list_users_full">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">list_users_full</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#list_users_full"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.list_users_full" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает полные данные пользователей для отображения в таблице.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Список кортежей (user_id, last_name, first_name, middle_name, login, role_id, access_level).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.delete_user">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">delete_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#delete_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.delete_user" title="Link to this definition">¶</a></dt>
+<dd><p>Удаляет пользователя по ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<em>int</em>) – Идентификатор пользователя.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True, если удаление успешно.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.update_user_password">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">update_user_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_password_plain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#update_user_password"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.update_user_password" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет пароль пользователя.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user_id</strong> (<em>int</em>) – Идентификатор пользователя.</p></li>
+<li><p><strong>new_password_plain</strong> (<em>str</em>) – Новый пароль в открытом виде.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True, если обновление успешно.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_role">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_role</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_role"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_role" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает роль по ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>role_id</strong> (<em>int</em>) – Идентификатор роли.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (role_id, role_name, level) или None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_access_level_by_role">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_access_level_by_role</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_access_level_by_role"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_access_level_by_role" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает числовой уровень доступа для роли.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>role_id</strong> (<em>int</em>) – Идентификатор роли.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Уровень доступа (1–5) или None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.add_room">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">add_room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#add_room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.add_room" title="Link to this definition">¶</a></dt>
+<dd><p>Добавляет новое помещение.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>room_number</strong> (<em>str</em>) – Номер или название помещения.</p></li>
+<li><p><strong>description</strong> (<em>str</em>) – Описание помещения.</p></li>
+<li><p><strong>access_id</strong> (<em>int</em><em> | </em><em>None</em>) – Требуемый уровень доступа (опционально).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Идентификатор созданного помещения.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.list_rooms">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">list_rooms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#list_rooms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.list_rooms" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает список всех помещений.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Список кортежей (room_id, room_number, description, access_id).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_room">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_room" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает помещение по ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>room_id</strong> (<em>int</em>) – Идентификатор помещения.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (room_id, room_number, description, access_id) или None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.delete_room">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">delete_room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">room_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#delete_room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.delete_room" title="Link to this definition">¶</a></dt>
+<dd><p>Удаляет помещение и все связанные с ним ключи.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>room_id</strong> (<em>int</em>) – Идентификатор помещения.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True, если удаление успешно.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.add_key">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">add_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">room_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'available'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#add_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.add_key" title="Link to this definition">¶</a></dt>
+<dd><p>Добавляет новый ключ.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_number</strong> (<em>str</em>) – Номер или обозначение ключа.</p></li>
+<li><p><strong>room_id</strong> (<em>int</em>) – Идентификатор помещения.</p></li>
+<li><p><strong>activity</strong> (<em>str</em>) – Статус ключа (<code class="docutils literal notranslate"><span class="pre">available</span></code>, <code class="docutils literal notranslate"><span class="pre">issued</span></code>, <code class="docutils literal notranslate"><span class="pre">lost</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Идентификатор созданного ключа.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.list_keys">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">list_keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#list_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.list_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает список всех ключей с информацией о помещениях.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Список кортежей (key_id, key_number, room_number, activity).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.find_key_by_number">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">find_key_by_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#find_key_by_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.find_key_by_number" title="Link to this definition">¶</a></dt>
+<dd><p>Ищет ключ по его номеру.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_number</strong> (<em>str</em>) – Номер ключа.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (key_id, key_number, room_id, activity) или None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_key">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_key" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает ключ по ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (key_id, key_number, room_id, activity) или None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.update_key_activity">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">update_key_activity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#update_key_activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.update_key_activity" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет статус ключа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>activity</strong> (<em>str</em>) – Новый статус (<code class="docutils literal notranslate"><span class="pre">available</span></code>, <code class="docutils literal notranslate"><span class="pre">issued</span></code>, <code class="docutils literal notranslate"><span class="pre">lost</span></code>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.update_key_status">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">update_key_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_status</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#update_key_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.update_key_status" title="Link to this definition">¶</a></dt>
+<dd><p>Обновляет статус ключа (обёртка с обработкой ошибок).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>new_status</strong> (<em>str</em>) – Новый статус.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True, если обновление успешно.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.delete_key">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">delete_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#delete_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.delete_key" title="Link to this definition">¶</a></dt>
+<dd><p>Удаляет ключ по ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True, если удаление успешно.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.add_operation">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">add_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issued_by</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tips_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_deadline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#add_operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.add_operation" title="Link to this definition">¶</a></dt>
+<dd><p>Добавляет операцию (выдачи или возврата) в журнал.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>user_id</strong> (<em>int</em>) – Идентификатор пользователя (получателя/возвращающего).</p></li>
+<li><p><strong>issued_by</strong> (<em>int</em>) – Идентификатор сотрудника, оформившего операцию.</p></li>
+<li><p><strong>tips_id</strong> (<em>int</em>) – Тип операции (1 — выдача, 2 — возврат).</p></li>
+<li><p><strong>return_deadline</strong> (<em>str</em><em> | </em><em>None</em>) – Срок возврата (ISO формат), опционально.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Идентификатор созданной операции.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.get_last_operation_for_key">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">get_last_operation_for_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#get_last_operation_for_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.get_last_operation_for_key" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает последнюю операцию для указанного ключа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж операции или None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.list_operations">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">list_operations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#list_operations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.list_operations" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает список операций с детализацией.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>limit</strong> (<em>int</em>) – Максимальное количество записей.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Список кортежей (operation_id, datetime, return_deadline,
+operation_type, key_number, user_name, issuer_name).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.add_violation">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">add_violation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overdue_seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">note</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#add_violation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.add_violation" title="Link to this definition">¶</a></dt>
+<dd><p>Добавляет запись о нарушении (просрочка возврата ключа).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation_id</strong> (<em>int</em>) – Идентификатор операции выдачи.</p></li>
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>user_id</strong> (<em>int</em>) – Идентификатор пользователя, нарушившего срок.</p></li>
+<li><p><strong>overdue_seconds</strong> (<em>int</em>) – Время просрочки в секундах.</p></li>
+<li><p><strong>note</strong> (<em>str</em>) – Примечание к нарушению.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Идентификатор созданной записи о нарушении.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="models.list_violations">
+<span class="sig-prename descclassname"><span class="pre">models.</span></span><span class="sig-name descname"><span class="pre">list_violations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">200</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models.html#list_violations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.list_violations" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает список нарушений с детализацией.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>limit</strong> (<em>int</em>) – Максимальное количество записей.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Список кортежей (violation_id, issued_at, returned_at,
+overdue_seconds, note, key_number, user_name).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-services">Модуль бизнес-логики.</p>
+<p>Содержит основные сервисные функции:
+- Аутентификация пользователей
+- Проверка прав доступа
+- Выдача и возврат ключей
+- Сброс паролей
+- Расчёт просрочек и фиксация нарушений</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="services.ACTION_ISSUE">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">ACTION_ISSUE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#services.ACTION_ISSUE" title="Link to this definition">¶</a></dt>
+<dd><p>Идентификатор типа операции “выдача”.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="services.ACTION_RETURN">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">ACTION_RETURN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#services.ACTION_RETURN" title="Link to this definition">¶</a></dt>
+<dd><p>Идентификатор типа операции “возврат”.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="services.check_user_credentials">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">check_user_credentials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">login</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password_plain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/services.html#check_user_credentials"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#services.check_user_credentials" title="Link to this definition">¶</a></dt>
+<dd><p>Проверяет логин и пароль пользователя.</p>
+<p>Поддерживает проверку как хешированных, так и открытых паролей
+(для обратной совместимости).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>login</strong> (<em>str</em>) – Логин пользователя.</p></li>
+<li><p><strong>password_plain</strong> (<em>str</em>) – Пароль в открытом виде.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Идентификатор пользователя при успехе, иначе None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="services.get_user_access_level">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">get_user_access_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/services.html#get_user_access_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#services.get_user_access_level" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает числовой уровень доступа пользователя.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>user_id</strong> (<em>int</em>) – Идентификатор пользователя.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Уровень доступа (1–5) или None, если пользователь не найден.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="services.can_issue_key">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">can_issue_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issued_by</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient_user_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/services.html#can_issue_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#services.can_issue_key" title="Link to this definition">¶</a></dt>
+<dd><p>Проверяет возможность выдачи ключа.</p>
+<p>Выполняет следующие проверки:
+1. Ключ существует.
+2. Помещение существует.
+3. Выдающий имеет уровень доступа &gt;= 4 (охранник/админ).
+4. Получатель имеет достаточный уровень доступа для помещения.
+5. Ключ не выдан в данный момент.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>issued_by</strong> (<em>int</em>) – Идентификатор выдающего сотрудника.</p></li>
+<li><p><strong>recipient_user_id</strong> (<em>int</em>) – Идентификатор получателя ключа.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (can_issue: bool, reason: str | None).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[bool, str | None]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="services.issue_key">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">issue_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recipient_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">issued_by</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">due_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">due_datetime_iso</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/services.html#issue_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#services.issue_key" title="Link to this definition">¶</a></dt>
+<dd><p>Оформляет выдачу ключа.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>recipient_user_id</strong> (<em>int</em>) – Идентификатор получателя.</p></li>
+<li><p><strong>issued_by</strong> (<em>int</em>) – Идентификатор выдающего.</p></li>
+<li><p><strong>due_hours</strong> (<em>float</em><em> | </em><em>None</em>) – Срок возврата в часах (альтернатива due_datetime_iso).</p></li>
+<li><p><strong>due_datetime_iso</strong> (<em>str</em><em> | </em><em>None</em>) – Срок возврата в формате ISO (YYYY-MM-DD HH:MM:SS).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (success: bool, message: str).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[bool, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="services.return_key">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">return_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">returning_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_by</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/services.html#return_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#services.return_key" title="Link to this definition">¶</a></dt>
+<dd><p>Оформляет возврат ключа.</p>
+<p>При просрочке возврата автоматически создаёт запись о нарушении.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_id</strong> (<em>int</em>) – Идентификатор ключа.</p></li>
+<li><p><strong>returning_user_id</strong> (<em>int</em>) – Идентификатор возвращающего пользователя.</p></li>
+<li><p><strong>processed_by</strong> (<em>int</em>) – Идентификатор сотрудника, принимающего ключ.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (success: bool, message: str).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[bool, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="services.reset_user_password">
+<span class="sig-prename descclassname"><span class="pre">services.</span></span><span class="sig-name descname"><span class="pre">reset_user_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">admin_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_user_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_password</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/services.html#reset_user_password"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#services.reset_user_password" title="Link to this definition">¶</a></dt>
+<dd><p>Сбрасывает пароль пользователя (только для администраторов).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>admin_user_id</strong> (<em>int</em>) – Идентификатор администратора, выполняющего операцию.</p></li>
+<li><p><strong>target_user_id</strong> (<em>int</em>) – Идентификатор пользователя, чей пароль сбрасывается.</p></li>
+<li><p><strong>new_password</strong> (<em>str</em>) – Новый пароль (минимум 4 символа).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Кортеж (success: bool, message: str).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[bool, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-database">Модуль инициализации базы данных.</p>
+<p>Создаёт SQLite базу данных со всеми необходимыми таблицами
+и справочными данными (уровни доступа, роли, типы операций,
+начальный администратор).</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="database.DB_DIR">
+<span class="sig-prename descclassname"><span class="pre">database.</span></span><span class="sig-name descname"><span class="pre">DB_DIR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'KeySystem'</span></span><a class="headerlink" href="#database.DB_DIR" title="Link to this definition">¶</a></dt>
+<dd><p>Директория для хранения базы данных.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="database.DB_PATH">
+<span class="sig-prename descclassname"><span class="pre">database.</span></span><span class="sig-name descname"><span class="pre">DB_PATH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'KeySystem\\D1.db'</span></span><a class="headerlink" href="#database.DB_PATH" title="Link to this definition">¶</a></dt>
+<dd><p>Полный путь к файлу базы данных SQLite.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="database.ensure_db_dir">
+<span class="sig-prename descclassname"><span class="pre">database.</span></span><span class="sig-name descname"><span class="pre">ensure_db_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#ensure_db_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.ensure_db_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Создаёт директорию для базы данных, если она не существует.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="database.get_connection">
+<span class="sig-prename descclassname"><span class="pre">database.</span></span><span class="sig-name descname"><span class="pre">get_connection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#get_connection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.get_connection" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает подключение к SQLite базе данных.</p>
+<p>Автоматически создаёт директорию и включает поддержку
+внешних ключей (<code class="docutils literal notranslate"><span class="pre">PRAGMA</span> <span class="pre">foreign_keys</span> <span class="pre">=</span> <span class="pre">ON</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Объект подключения sqlite3.Connection.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>sqlite3.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="database.create_db">
+<span class="sig-prename descclassname"><span class="pre">database.</span></span><span class="sig-name descname"><span class="pre">create_db</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#create_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.create_db" title="Link to this definition">¶</a></dt>
+<dd><p>Создаёт структуру базы данных и заполняет справочники.</p>
+<p>Выполняет следующие действия:
+1. Создаёт таблицы: access_levels, roles, users, action_types,</p>
+<blockquote>
+<div><p>rooms, keys, operations, violations.</p>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Заполняет справочники уровней доступа (1–5).</p></li>
+<li><p>Создаёт роли: Сотрудник, Сотрудник_lvl2, Сотрудник_lvl3,
+Охранник, Администратор.</p></li>
+<li><p>Добавляет типы операций: 1 — выдача, 2 — возврат.</p></li>
+<li><p>Создаёт начального администратора (login: <code class="docutils literal notranslate"><span class="pre">admin</span></code>,
+password: <code class="docutils literal notranslate"><span class="pre">admin123</span></code>).</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>sqlite3.Error</strong> – При ошибках выполнения SQL.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-utils">Модуль утилит для KeyControlApp.</p>
+<p>Содержит вспомогательные функции для хеширования паролей
+и работы с датами/временем.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.hash_password">
+<span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">hash_password</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/utils.html#hash_password"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.hash_password" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает SHA-256 хеш пароля.</p>
+<p>Используется для безопасного хранения паролей пользователей
+в базе данных. Хеширование одностороннее — восстановление
+исходного пароля невозможно.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>password</strong> (<em>str</em>) – Пароль в открытом виде.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SHA-256 хеш в виде шестнадцатеричной строки.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Если password не является строкой.</p>
+</dd>
+</dl>
+<p>Пример использования:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">hash_password</span><span class="p">(</span><span class="s2">&quot;admin123&quot;</span><span class="p">)</span>
+<span class="go">&#39;240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.now_iso">
+<span class="sig-prename descclassname"><span class="pre">utils.</span></span><span class="sig-name descname"><span class="pre">now_iso</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/utils.html#now_iso"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.now_iso" title="Link to this definition">¶</a></dt>
+<dd><p>Возвращает текущее дату и время в ISO формате.</p>
+<p>Формат: <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span> <span class="pre">HH:MM:SS</span></code>. Используется для записи
+временных меток в журнал операций и нарушений.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Текущее время в ISO формате с разделителем-пробелом.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+<p>Пример использования:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">now_iso</span><span class="p">()</span>
+<span class="go">&#39;2024-01-15 09:30:45&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">KeyControlApp</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main.start_app"><code class="docutils literal notranslate"><span class="pre">start_app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auth.LoginWindow"><code class="docutils literal notranslate"><span class="pre">LoginWindow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui.KeyControlApp"><code class="docutils literal notranslate"><span class="pre">KeyControlApp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.insert_default_reference_data"><code class="docutils literal notranslate"><span class="pre">insert_default_reference_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.add_user"><code class="docutils literal notranslate"><span class="pre">add_user()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_user_by_login"><code class="docutils literal notranslate"><span class="pre">get_user_by_login()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_user"><code class="docutils literal notranslate"><span class="pre">get_user()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.list_users"><code class="docutils literal notranslate"><span class="pre">list_users()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.list_users_full"><code class="docutils literal notranslate"><span class="pre">list_users_full()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.delete_user"><code class="docutils literal notranslate"><span class="pre">delete_user()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.update_user_password"><code class="docutils literal notranslate"><span class="pre">update_user_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_role"><code class="docutils literal notranslate"><span class="pre">get_role()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_access_level_by_role"><code class="docutils literal notranslate"><span class="pre">get_access_level_by_role()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.add_room"><code class="docutils literal notranslate"><span class="pre">add_room()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.list_rooms"><code class="docutils literal notranslate"><span class="pre">list_rooms()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_room"><code class="docutils literal notranslate"><span class="pre">get_room()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.delete_room"><code class="docutils literal notranslate"><span class="pre">delete_room()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.add_key"><code class="docutils literal notranslate"><span class="pre">add_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.list_keys"><code class="docutils literal notranslate"><span class="pre">list_keys()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.find_key_by_number"><code class="docutils literal notranslate"><span class="pre">find_key_by_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_key"><code class="docutils literal notranslate"><span class="pre">get_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.update_key_activity"><code class="docutils literal notranslate"><span class="pre">update_key_activity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.update_key_status"><code class="docutils literal notranslate"><span class="pre">update_key_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.delete_key"><code class="docutils literal notranslate"><span class="pre">delete_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.add_operation"><code class="docutils literal notranslate"><span class="pre">add_operation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.get_last_operation_for_key"><code class="docutils literal notranslate"><span class="pre">get_last_operation_for_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.list_operations"><code class="docutils literal notranslate"><span class="pre">list_operations()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.add_violation"><code class="docutils literal notranslate"><span class="pre">add_violation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#models.list_violations"><code class="docutils literal notranslate"><span class="pre">list_violations()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.ACTION_ISSUE"><code class="docutils literal notranslate"><span class="pre">ACTION_ISSUE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.ACTION_RETURN"><code class="docutils literal notranslate"><span class="pre">ACTION_RETURN</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.check_user_credentials"><code class="docutils literal notranslate"><span class="pre">check_user_credentials()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.get_user_access_level"><code class="docutils literal notranslate"><span class="pre">get_user_access_level()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.can_issue_key"><code class="docutils literal notranslate"><span class="pre">can_issue_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.issue_key"><code class="docutils literal notranslate"><span class="pre">issue_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.return_key"><code class="docutils literal notranslate"><span class="pre">return_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#services.reset_user_password"><code class="docutils literal notranslate"><span class="pre">reset_user_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database.DB_DIR"><code class="docutils literal notranslate"><span class="pre">DB_DIR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database.DB_PATH"><code class="docutils literal notranslate"><span class="pre">DB_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database.ensure_db_dir"><code class="docutils literal notranslate"><span class="pre">ensure_db_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database.get_connection"><code class="docutils literal notranslate"><span class="pre">get_connection()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#database.create_db"><code class="docutils literal notranslate"><span class="pre">create_db()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utils.hash_password"><code class="docutils literal notranslate"><span class="pre">hash_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utils.now_iso"><code class="docutils literal notranslate"><span class="pre">now_iso()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">KeyControlApp — документация</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Ваше Имя.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/modules.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

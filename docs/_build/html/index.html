@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>KeyControlApp — документация &#8212; KeyControlApp 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="modules.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="keycontrolapp">
+<h1>KeyControlApp — документация<a class="headerlink" href="#keycontrolapp" title="Link to this heading">¶</a></h1>
+<p>Информационная система учёта выдачи и возврата ключей.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#main.start_app"><code class="docutils literal notranslate"><span class="pre">start_app()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#auth.LoginWindow"><code class="docutils literal notranslate"><span class="pre">LoginWindow</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#gui.KeyControlApp"><code class="docutils literal notranslate"><span class="pre">KeyControlApp</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.insert_default_reference_data"><code class="docutils literal notranslate"><span class="pre">insert_default_reference_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.add_user"><code class="docutils literal notranslate"><span class="pre">add_user()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_user_by_login"><code class="docutils literal notranslate"><span class="pre">get_user_by_login()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_user"><code class="docutils literal notranslate"><span class="pre">get_user()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.list_users"><code class="docutils literal notranslate"><span class="pre">list_users()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.list_users_full"><code class="docutils literal notranslate"><span class="pre">list_users_full()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.delete_user"><code class="docutils literal notranslate"><span class="pre">delete_user()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.update_user_password"><code class="docutils literal notranslate"><span class="pre">update_user_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_role"><code class="docutils literal notranslate"><span class="pre">get_role()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_access_level_by_role"><code class="docutils literal notranslate"><span class="pre">get_access_level_by_role()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.add_room"><code class="docutils literal notranslate"><span class="pre">add_room()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.list_rooms"><code class="docutils literal notranslate"><span class="pre">list_rooms()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_room"><code class="docutils literal notranslate"><span class="pre">get_room()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.delete_room"><code class="docutils literal notranslate"><span class="pre">delete_room()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.add_key"><code class="docutils literal notranslate"><span class="pre">add_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.list_keys"><code class="docutils literal notranslate"><span class="pre">list_keys()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.find_key_by_number"><code class="docutils literal notranslate"><span class="pre">find_key_by_number()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_key"><code class="docutils literal notranslate"><span class="pre">get_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.update_key_activity"><code class="docutils literal notranslate"><span class="pre">update_key_activity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.update_key_status"><code class="docutils literal notranslate"><span class="pre">update_key_status()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.delete_key"><code class="docutils literal notranslate"><span class="pre">delete_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.add_operation"><code class="docutils literal notranslate"><span class="pre">add_operation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.get_last_operation_for_key"><code class="docutils literal notranslate"><span class="pre">get_last_operation_for_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.list_operations"><code class="docutils literal notranslate"><span class="pre">list_operations()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.add_violation"><code class="docutils literal notranslate"><span class="pre">add_violation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#models.list_violations"><code class="docutils literal notranslate"><span class="pre">list_violations()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.ACTION_ISSUE"><code class="docutils literal notranslate"><span class="pre">ACTION_ISSUE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.ACTION_RETURN"><code class="docutils literal notranslate"><span class="pre">ACTION_RETURN</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.check_user_credentials"><code class="docutils literal notranslate"><span class="pre">check_user_credentials()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.get_user_access_level"><code class="docutils literal notranslate"><span class="pre">get_user_access_level()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.can_issue_key"><code class="docutils literal notranslate"><span class="pre">can_issue_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.issue_key"><code class="docutils literal notranslate"><span class="pre">issue_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.return_key"><code class="docutils literal notranslate"><span class="pre">return_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#services.reset_user_password"><code class="docutils literal notranslate"><span class="pre">reset_user_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#database.DB_DIR"><code class="docutils literal notranslate"><span class="pre">DB_DIR</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#database.DB_PATH"><code class="docutils literal notranslate"><span class="pre">DB_PATH</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#database.ensure_db_dir"><code class="docutils literal notranslate"><span class="pre">ensure_db_dir()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#database.get_connection"><code class="docutils literal notranslate"><span class="pre">get_connection()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#database.create_db"><code class="docutils literal notranslate"><span class="pre">create_db()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#utils.hash_password"><code class="docutils literal notranslate"><span class="pre">hash_password()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#utils.now_iso"><code class="docutils literal notranslate"><span class="pre">now_iso()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="id1">
+<h2>Описание<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>Приложение для автоматизации учёта выдачи и возврата ключей от помещений.</p>
+<p>Реализовано на Python с использованием tkinter и SQLite.</p>
+</section>
+<section id="id2">
+<h2>Установка<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h2>Запуск<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>main.py
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id4">
+<h1>Индексы и таблицы<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">KeyControlApp</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Содержание:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="modules.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Ваше Имя.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
